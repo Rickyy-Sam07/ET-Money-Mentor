@@ -235,3 +235,429 @@ nav {
 .suggestion-card h4 {
   margin: 0 0 6px;
 }
+
+/* ── Dev2 Styles ─────────────────────────────────────────── */
+
+/* Progress bar */
+.progress-bar-track {
+  height: 8px;
+  background: #e7eef5;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0e6ba8, #1d7b5b);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+/* Step navigation */
+.step-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.step-nav button {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: 1px solid #cfd8df;
+  background: #0e6ba8;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+}
+
+/* Inline row for investments/goals */
+.inline-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.inline-row select,
+.inline-row input {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #cfd8df;
+  font: inherit;
+  flex: 1;
+}
+
+.btn-sm {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.btn-danger {
+  background: #d94040;
+  color: white;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px dashed #0e6ba8;
+  color: #0e6ba8;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+}
+
+/* Disclaimer */
+.disclaimer {
+  background: #fffbea;
+  border: 1px solid #f5d060;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  color: #8a6d3b;
+  margin: 8px 0;
+}
+
+/* Radar / health score grid */
+.radar-grid {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.radar-item {
+  display: grid;
+  grid-template-columns: 180px 1fr 60px;
+  align-items: center;
+  gap: 8px;
+}
+
+.radar-label {
+  text-transform: capitalize;
+  font-size: 0.9rem;
+}
+
+/* Roadmap timeline */
+.roadmap-timeline {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.roadmap-month {
+  border: 1px solid #d9e2ec;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: #fbfdff;
+}
+
+.roadmap-month-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.roadmap-month ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  font-size: 0.9rem;
+  color: #3d4f5f;
+}
+
+.roadmap-month li {
+  margin-bottom: 4px;
+}
+
+/* Life event allocation bars */
+.allocation-bars {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.alloc-row {
+  display: grid;
+  gap: 4px;
+}
+
+.alloc-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.priority-list {
+  padding-left: 20px;
+}
+
+.priority-list li {
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.tax-note,
+.goal-impact {
+  margin-top: 10px;
+  padding: 10px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+/* Couple planner */
+.couple-form {
+  margin-top: 12px;
+}
+
+.couple-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.partner-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.partner-col h3 {
+  margin: 0 0 4px;
+  color: #0f3557;
+}
+
+.partner-col label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.95rem;
+}
+
+.partner-col input {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #cfd8df;
+  font: inherit;
+}
+
+/* Data table */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
+.data-table th,
+.data-table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.data-table th {
+  background: #f2f6f8;
+  font-weight: 600;
+}
+
+/* Projection bars */
+.projection-bars {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.proj-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 130px;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+/* Scenario cards */
+.scenario-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.scenario-card {
+  border: 1px solid #d9e2ec;
+  border-radius: 10px;
+  padding: 14px;
+  background: #fbfdff;
+}
+
+.scenario-card h3 {
+  margin: 0 0 6px;
+  color: #0f3557;
+}
+
+.gain {
+  color: #1d7b5b;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* Emergency page */
+.emergency-card {
+  background: #f9fafb;
+}
+
+.chat-container {
+  margin-top: 12px;
+}
+
+.emergency-bubble {
+  background: #f0f7ed;
+}
+
+.emergency-response {
+  margin-top: 10px;
+}
+
+.personal-note {
+  padding: 8px;
+  background: #e8f4fd;
+  border-radius: 6px;
+  font-style: italic;
+  margin-bottom: 8px;
+}
+
+.action-steps {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.action-step {
+  border: 1px solid #d9e2ec;
+  border-radius: 8px;
+  padding: 10px;
+  background: white;
+}
+
+.action-step.priority-immediate {
+  border-left: 4px solid #d94040;
+}
+
+.action-step.priority-within_1_week {
+  border-left: 4px solid #d4a017;
+}
+
+.action-step.priority-important {
+  border-left: 4px solid #0e6ba8;
+}
+
+.action-step.priority-ongoing {
+  border-left: 4px solid #1d7b5b;
+}
+
+.action-step.priority-optional {
+  border-left: 4px solid #7b8794;
+}
+
+.step-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.priority-badge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #e7eef5;
+  color: #3d4f5f;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.resource-link {
+  display: inline-block;
+  margin-top: 6px;
+  color: #0e6ba8;
+  font-size: 0.85rem;
+}
+
+.emergency-input {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.emergency-input input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #cfd8df;
+  font: inherit;
+}
+
+.emergency-input button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: #0e6ba8;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.crisis-select {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #cfd8df;
+  font: inherit;
+  min-width: 140px;
+}
+
+/* Recommendation cards */
+.rec-card {
+  transition: box-shadow 0.2s ease;
+}
+
+.rec-card:hover {
+  box-shadow: 0 4px 16px rgba(10, 40, 60, 0.12);
+}
+
+.tax-rec-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tax-rec-item:last-child {
+  border-bottom: none;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .couple-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .radar-item {
+    grid-template-columns: 1fr;
+  }
+
+  .proj-row {
+    grid-template-columns: 1fr;
+  }
+
+  .scenario-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .nav-link {
+    padding: 4px 6px;
+    font-size: 0.85rem;
+  }
+}

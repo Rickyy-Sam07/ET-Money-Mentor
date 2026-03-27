@@ -52,3 +52,61 @@ class Portfolio(Base):
     overlap: Mapped[float | None] = mapped_column(Float, nullable=True)
     expense_ratio: Mapped[float | None] = mapped_column(Float, nullable=True)
     benchmark: Mapped[str] = mapped_column(Text, default="{}")
+
+
+# ── Dev2 models ──────────────────────────────────────────────
+
+
+class FinancialGoal(Base):
+    __tablename__ = "financial_goals"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    goal_type: Mapped[str] = mapped_column(String(64), default="retirement")
+    target_amount: Mapped[float] = mapped_column(Float, default=0)
+    monthly_sip: Mapped[float] = mapped_column(Float, default=0)
+    timeline_months: Mapped[int] = mapped_column(Integer, default=0)
+    roadmap: Mapped[str] = mapped_column(Text, default="[]")
+    health_score: Mapped[str] = mapped_column(Text, default="{}")
+
+
+class LifeEvent(Base):
+    __tablename__ = "life_events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    event_type: Mapped[str] = mapped_column(String(32))
+    amount: Mapped[float] = mapped_column(Float, default=0)
+    advice: Mapped[str] = mapped_column(Text, default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class CoupleData(Base):
+    __tablename__ = "couple_data"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    partner2_profile: Mapped[str] = mapped_column(Text, default="{}")
+    joint_plan: Mapped[str] = mapped_column(Text, default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class EmergencyInteraction(Base):
+    __tablename__ = "emergency_interactions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    crisis_type: Mapped[str] = mapped_column(String(64))
+    details: Mapped[str] = mapped_column(Text, default="")
+    steps: Mapped[str] = mapped_column(Text, default="[]")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class Recommendation(Base):
+    __tablename__ = "recommendations"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    category: Mapped[str] = mapped_column(String(32), default="general")
+    items: Mapped[str] = mapped_column(Text, default="[]")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

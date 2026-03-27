@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.db.database import Base, engine
 from app.routes.api import router as api_router
+from app.routes.dev2_routes import router as dev2_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -17,3 +18,5 @@ app.add_middleware(
 )
 
 app.include_router(api_router)
+app.include_router(dev2_router)
+
