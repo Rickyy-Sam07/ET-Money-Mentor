@@ -69,6 +69,13 @@ export function LifeEventPage() {
                     <div className="insight-panel">
                         <h3>{result.title}</h3>
 
+                        {result.ai_advice && (
+                            <div className="ai-panel">
+                                <h4>🤖 AI Advice</h4>
+                                <p>{result.ai_advice}</p>
+                            </div>
+                        )}
+
                         <h4>Priority Steps</h4>
                         <ol className="priority-list">
                             {(result.priority_steps as string[]).map((step: string, i: number) => (

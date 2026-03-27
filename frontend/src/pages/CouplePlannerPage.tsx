@@ -60,6 +60,14 @@ export function CouplePlannerPage() {
 
             {result && (
                 <div className="couple-results">
+                    {/* AI Plan */}
+                    {result.ai_plan && (
+                        <div className="ai-panel">
+                            <h3>🤖 AI Joint Plan Summary</h3>
+                            <p>{result.ai_plan}</p>
+                        </div>
+                    )}
+
                     {/* HRA */}
                     <div className="insight-panel">
                         <h3>🏠 HRA Optimization</h3>

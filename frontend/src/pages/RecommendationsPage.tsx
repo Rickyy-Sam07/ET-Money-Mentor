@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getRecommendations } from "../lib/api";
+import { useFinancialStore } from "../lib/useStore";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -8,6 +9,7 @@ function formatInr(v: number) {
 }
 
 export function RecommendationsPage() {
+    const { profile } = useFinancialStore();
     const [result, setResult] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -15,6 +17,7 @@ export function RecommendationsPage() {
     useEffect(() => {
         async function load() {
             try {
+                // If profile exists in store, we could even show local recs first
                 const data = await getRecommendations();
                 setResult(data);
             } catch {
@@ -24,7 +27,7 @@ export function RecommendationsPage() {
             }
         }
         void load();
-    }, []);
+    }, [profile]);
 
     if (loading) return <section className="card"><h2>Loading recommendations...</h2></section>;
     if (error) return <section className="card"><h2>Recommendations</h2><p className="error-text">{error}</p></section>;
@@ -37,6 +40,14 @@ export function RecommendationsPage() {
                 Profile: <strong>{(result.segment as string).replace(/_/g, " ")}</strong> | Risk: <strong>{result.risk_profile}</strong>
             </p>
             <p className="disclaimer">⚠️ This is for educational purposes only. Consult a SEBI-registered advisor.</p>
+
+            {/* AI Explanation */}
+            {result.ai_explanation && (
+                <div className="ai-panel">
+                    <h3>🤖 AI Insight</h3>
+                    <p>{result.ai_explanation}</p>
+                </div>
+            )}
 
             {/* Asset Allocation */}
             <div className="insight-panel">

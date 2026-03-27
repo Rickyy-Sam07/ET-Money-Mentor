@@ -177,6 +177,15 @@ nav {
   background: #ffffff;
 }
 
+.metric-card.worst-case {
+  background: #fff5f5;
+  border: 1px dashed #feb2b2;
+}
+
+.metric-card.worst-case strong {
+  color: #c53030;
+}
+
 .metric-card span {
   display: block;
   color: #516173;
@@ -237,6 +246,53 @@ nav {
 }
 
 /* ── Dev2 Styles ─────────────────────────────────────────── */
+
+/* AI Panel */
+.ai-panel {
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+  border: 1px solid #d0e6f8;
+  border-left: 5px solid #0e6ba8;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(14, 107, 168, 0.08);
+  /* Magic glow */
+  font-size: 0.95rem;
+  line-height: 1.6;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: slide-in 0.4s ease-out;
+}
+
+.ai-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(14, 107, 168, 0.12);
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ai-panel h3,
+.ai-panel h4 {
+  margin: 0 0 8px;
+  color: #0f3557;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-panel p {
+  margin: 4px 0;
+  color: #2d3e4f;
+}
 
 /* Progress bar */
 .progress-bar-track {

@@ -5,6 +5,12 @@ from app.db.database import Base, engine
 from app.routes.api import router as api_router
 from app.routes.dev2_routes import router as dev2_router
 
+try:
+    with engine.connect() as conn:
+        pass
+except Exception:
+    pass
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="ET Money Mentor API", version="0.1.0")

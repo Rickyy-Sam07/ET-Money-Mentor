@@ -1,5 +1,6 @@
 import { FormEvent, useState } from "react";
 import { submitOnboarding } from "../lib/api";
+import { useFinancialStore } from "../lib/useStore";
 
 const INVESTMENT_TYPES = ["Mutual Funds", "Stocks", "PPF", "NPS", "FD", "Gold", "ELSS", "EPF", "LIC", "Real Estate"];
 const GOAL_TYPES = ["Retirement", "Child Education", "House", "Car", "Travel", "Emergency Fund", "Wealth Building"];
@@ -7,6 +8,7 @@ const GOAL_TYPES = ["Retirement", "Child Education", "House", "Car", "Travel", "
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export function OnboardingPage() {
+    const { setProfile, setHealthScore } = useFinancialStore();
     const [step, setStep] = useState(1);
 
     // Step 1: Personal
@@ -51,20 +53,23 @@ export function OnboardingPage() {
         e.preventDefault();
         setLoading(true);
         setError("");
+        const payload = {
+            age: Number(age),
+            income: Number(income),
+            expenses: Number(expenses),
+            investments: investments.map((inv) => ({ type: inv.type, amount: inv.amount })),
+            goals: goals.map((g) => ({ type: g.type, target: g.target, years: g.years })),
+            risk_profile: riskProfile,
+            emergency_fund: Number(emergencyFund),
+            health_insurance: Number(healthInsurance),
+            life_insurance: Number(lifeInsurance),
+            debt_emi: Number(debtEmi),
+        };
         try {
-            const data = await submitOnboarding({
-                age: Number(age),
-                income: Number(income),
-                expenses: Number(expenses),
-                investments: investments.map((inv) => ({ type: inv.type, amount: inv.amount })),
-                goals: goals.map((g) => ({ type: g.type, target: g.target, years: g.years })),
-                risk_profile: riskProfile,
-                emergency_fund: Number(emergencyFund),
-                health_insurance: Number(healthInsurance),
-                life_insurance: Number(lifeInsurance),
-                debt_emi: Number(debtEmi),
-            });
+            const data = await submitOnboarding(payload);
             setResult(data);
+            setProfile(payload as any); // Update local profile
+            setHealthScore(data.health_score); // Update global health score
             setStep(5);
         } catch {
             setError("Failed to submit onboarding. Is the backend running?");
@@ -197,6 +202,14 @@ export function OnboardingPage() {
             {/* Results */}
             {result && step === 5 && (
                 <div className="onboarding-results">
+                    {/* AI Summary */}
+                    {result.ai_summary && (
+                        <div className="ai-panel">
+                            <h3>🤖 AI Analysis</h3>
+                            <p>{result.ai_summary}</p>
+                        </div>
+                    )}
+
                     {/* Money Health Score */}
                     <div className="insight-panel">
                         <h3>💪 Money Health Score: {result.health_score.overall}/100</h3>

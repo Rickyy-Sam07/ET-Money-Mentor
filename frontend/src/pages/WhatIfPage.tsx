@@ -82,6 +82,11 @@ export function WhatIfPage() {
                                         <strong>{formatInr(s.projected_10y)}</strong>
                                         <span className="gain">+{formatInr(s.gain_over_base_10y)}</span>
                                     </div>
+                                    <div className="metric-card worst-case">
+                                        <span>📉 Worst Case (10th %)</span>
+                                        <strong>{formatInr(s.worst_case_10y)}</strong>
+                                        <span className="muted">Expected in market crashes.</span>
+                                    </div>
                                 </div>
                                 <p className="muted" style={{ marginTop: 8 }}>Risk: {s.risk}</p>
                             </div>
@@ -92,6 +97,13 @@ export function WhatIfPage() {
                         <h4>💡 Recommendation</h4>
                         <p>{result.recommendation}</p>
                     </div>
+
+                    {result.ai_narration && (
+                        <div className="ai-panel" style={{ marginTop: 14 }}>
+                            <h4>🤖 AI Analysis</h4>
+                            <p>{result.ai_narration}</p>
+                        </div>
+                    )}
                 </div>
             )}
         </section>

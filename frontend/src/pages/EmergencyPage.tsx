@@ -76,6 +76,12 @@ export function EmergencyPage() {
                                             </div>
                                         ))}
                                     </div>
+                                    {msg.data.ai_response && (
+                                        <div className="ai-panel" style={{ marginTop: 10 }}>
+                                            <h4>🤖 AI Guidance</h4>
+                                            <p>{msg.data.ai_response}</p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

@@ -1,0 +1,3 @@
+Pooler port 5432: FAIL - (psycopg2.OperationalError) connection to server at "aws-0-ap-northeast-2.pooler.supabase.com" (15.164.120.176), port 5432 failed: FATAL:  Tenant or user not found connection to server at "aws-0-ap-no
+Pooler port 6543: FAIL - (psycopg2.OperationalError) connection to server at "aws-0-ap-northeast-2.pooler.supabase.com" (15.164.120.176), port 6543 failed: FATAL:  Tenant or user not found connection to server at "aws-0-ap-no
+Direct with IPv4: FAIL - (psycopg2.OperationalError) connection to server at "13.124.111.232", port 5432 failed: FATAL:  Tenant or user not found connection to server at "13.124.111.232", port 5432 failed: FATAL:  Tenant or u
