@@ -1,8 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+import uvicorn
 
 from app.db.database import Base, engine
 from app.routes.api import router as api_router
+
+load_dotenv()
 
 Base.metadata.create_all(bind=engine)
 
@@ -17,3 +21,7 @@ app.add_middleware(
 )
 
 app.include_router(api_router)
+
+
+if __name__ == "__main__":
+    uvicorn.run("app.main:app", host="127.0.0.1", port=8013, reload=True)

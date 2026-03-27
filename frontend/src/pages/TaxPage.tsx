@@ -1,5 +1,6 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { analyzeTax } from "../lib/api";
+import { loadTaxInput, loadTaxResult, saveTaxInput, saveTaxResult } from "../lib/voiceState";
 
 function formatInr(value: number) {
   return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value);
@@ -12,6 +13,20 @@ export function TaxPage() {
   const [regime, setRegime] = useState<"old" | "new">("new");
   const [result, setResult] = useState<any>(null);
 
+  useEffect(() => {
+    const cachedInput = loadTaxInput();
+    if (cachedInput) {
+      setSalary(String(cachedInput.gross_salary));
+      setDed80c(String(cachedInput.deductions_80c));
+      setDed80d(String(cachedInput.deductions_80d));
+      setRegime(cachedInput.regime_preference);
+    }
+    const cachedResult = loadTaxResult();
+    if (cachedResult) {
+      setResult(cachedResult);
+    }
+  }, []);
+
   async function submit(e: FormEvent) {
     e.preventDefault();
     const data = await analyzeTax(
@@ -22,6 +37,13 @@ export function TaxPage() {
       },
       regime
     );
+    saveTaxInput({
+      gross_salary: Number(salary),
+      deductions_80c: Number(ded80c),
+      deductions_80d: Number(ded80d),
+      regime_preference: regime,
+    });
+    saveTaxResult(data);
     setResult(data);
   }
 

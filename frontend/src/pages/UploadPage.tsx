@@ -1,5 +1,6 @@
 import { ChangeEvent, useState } from "react";
 import { uploadDocument } from "../lib/api";
+import { saveUploadPayload } from "../lib/voiceState";
 
 export function UploadPage() {
   const [result, setResult] = useState<any>(null);
@@ -15,6 +16,7 @@ export function UploadPage() {
     try {
       const data = await uploadDocument(file);
       setResult(data);
+      saveUploadPayload(data);
     } finally {
       setLoading(false);
     }

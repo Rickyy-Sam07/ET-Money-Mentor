@@ -7,6 +7,7 @@ const links = [
   { to: "/tax", label: "Tax Wizard" },
   { to: "/portfolio", label: "Portfolio X-Ray" },
   { to: "/news", label: "News" },
+  { to: "/report", label: "Report" },
 ];
 
 export function NavBar() {

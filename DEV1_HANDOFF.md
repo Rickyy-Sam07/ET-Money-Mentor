@@ -26,6 +26,22 @@ Data layer:
 - SQLite + SQLAlchemy models (`users`, `profiles`, `tax_data`, `portfolio`)
 - Session-centric flow for cross-feature continuity
 
+Voice/AI integrations:
+
+- Sarvam STT + TTS integrated
+- Groq-backed mentor response generation (with fallback)
+- Optional TTS controlled by `ENABLE_TTS` environment variable
+
+News/decision integrations:
+
+- NewsData live feed support when `NEWSDATA_API_KEY` is present
+- Market sentiment signal used by tax and portfolio recommendations
+
+Portfolio truthiness improvements:
+
+- `/api/upload` now attempts to parse transaction-like rows from statement text/OCR
+- `/api/portfolio/analyze` uses dated transaction cashflows for XIRR when provided
+
 ### Frontend (React)
 
 Base URL: `http://127.0.0.1:5173`

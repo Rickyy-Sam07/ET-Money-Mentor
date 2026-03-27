@@ -4,3 +4,7 @@ python-multipart==0.0.20
 sqlalchemy==2.0.39
 pydantic==2.11.3
 numpy==2.2.4
+requests==2.32.3
+sarvamai
+paddleocr
+pillow==10.4.0

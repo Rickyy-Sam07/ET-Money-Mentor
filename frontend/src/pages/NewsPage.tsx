@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
 import { getNews } from "../lib/api";
+import { loadNewsItems, saveNewsItems } from "../lib/voiceState";
 
 export function NewsPage() {
   const [items, setItems] = useState<any[]>([]);
 
   useEffect(() => {
     async function load() {
+      const cached = loadNewsItems<any[]>();
+      if (cached && cached.length > 0) {
+        setItems(cached);
+      }
       const data = await getNews();
-      setItems(data.items || []);
+      const latest = data.items || [];
+      setItems(latest);
+      saveNewsItems(latest);
     }
     void load();
   }, []);
