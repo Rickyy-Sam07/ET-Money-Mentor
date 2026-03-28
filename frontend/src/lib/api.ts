@@ -1,3 +1,4 @@
+// [DEV1] api.ts — shared API client. Dev2: append your functions below, do not modify existing ones.
 import axios from "axios";
 
 const api = axios.create({
@@ -26,6 +27,7 @@ export async function processVoice(payload: {
   text: string;
   language?: string;
   mode: "agent" | "ask";
+  useTts?: boolean;
 }) {
   const sessionId = await ensureSession();
   const { data } = await api.post("/api/voice/process", {
@@ -33,8 +35,50 @@ export async function processVoice(payload: {
     text: payload.text,
     language: payload.language,
     mode: payload.mode,
+    use_tts: Boolean(payload.useTts),
   });
   return data;
+}
+
+export async function processVoiceAudio(payload: {
+  audioFile: File;
+  language?: string;
+  mode: "agent" | "ask";
+  useTts?: boolean;
+}) {
+  const sessionId = await ensureSession();
+  const formData = new FormData();
+  formData.append("file", payload.audioFile);
+
+  const { data } = await api.post("/api/voice/process-audio", formData, {
+    params: {
+      session_id: sessionId,
+      mode: payload.mode,
+      language: payload.language,
+      use_tts: Boolean(payload.useTts),
+    },
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}
+
+export type VoiceCommandOption = {
+  id: string;
+  description: string;
+  examples: string[];
+};
+
+export async function resolveVoiceCommandIntent(payload: {
+  transcript: string;
+  commands: VoiceCommandOption[];
+}) {
+  const sessionId = await ensureSession();
+  const { data } = await api.post("/api/voice/resolve-command", {
+    session_id: sessionId,
+    transcript: payload.transcript,
+    commands: payload.commands,
+  });
+  return data as { command_id: string; confidence: number; reason?: string };
 }
 
 export async function uploadDocument(file: File) {

@@ -1,8 +1,11 @@
+// [DEV1] App.tsx — routing shell. Dev2: add your routes here, do not remove existing ones.
 import { Navigate, Route, Routes } from "react-router-dom";
 import { NavBar } from "./components/NavBar";
+import { VoiceCommandCenter } from "./components/VoiceCommandCenter";
 import { DashboardPage } from "./pages/DashboardPage";
 import { NewsPage } from "./pages/NewsPage";
 import { PortfolioPage } from "./pages/PortfolioPage";
+import { ReportPage } from "./pages/ReportPage";
 import { TaxPage } from "./pages/TaxPage";
 import { UploadPage } from "./pages/UploadPage";
 import { VoicePage } from "./pages/VoicePage";
@@ -19,6 +22,7 @@ export default function App() {
     <div className="app-shell">
       <NavBar />
       <main className="page-shell">
+        <VoiceCommandCenter />
         <Routes>
           {/* Dev1 pages */}
           <Route path="/" element={<DashboardPage />} />
@@ -27,6 +31,7 @@ export default function App() {
           <Route path="/tax" element={<TaxPage />} />
           <Route path="/portfolio" element={<PortfolioPage />} />
           <Route path="/news" element={<NewsPage />} />
+          <Route path="/report" element={<ReportPage />} />
           {/* Dev2 pages */}
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/life-event" element={<LifeEventPage />} />

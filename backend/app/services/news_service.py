@@ -1,3 +1,4 @@
+# [DEV1] news_service.py — RAG news query + warning tagging. Dev2: do not modify.
 from typing import Any
 
 
@@ -27,17 +28,21 @@ NEWS_STORE = [
 
 
 def query_news(context: dict[str, Any]) -> list[dict[str, Any]]:
+    live_items = fetch_latest_finance_news(max_items=10)
+    store = live_items if live_items else NEWS_STORE
     holdings = " ".join([str(item.get("name", "")) for item in context.get("holdings", [])]).lower()
 
     results = []
-    for item in NEWS_STORE:
-        warn = item["sentiment"] == "negative" or "warning" in item["tags"]
+    for item in store:
+        tags = item.get("tags") or item.get("keywords") or []
+        sentiment = item.get("sentiment", "neutral")
+        warn = sentiment == "negative" or "warning" in tags
         impact = "Monitor closely." if warn else "No immediate action required."
 
         relevance = 0.6
-        if "index" in holdings and "index" in item["tags"]:
+        if "index" in holdings and "index" in tags:
             relevance = 0.92
-        elif "debt" in holdings and "debt" in item["tags"]:
+        elif "debt" in holdings and "debt" in tags:
             relevance = 0.88
 
         row = {
@@ -45,6 +50,7 @@ def query_news(context: dict[str, Any]) -> list[dict[str, Any]]:
             "warning": warn,
             "impact": impact,
             "relevance": relevance,
+            "is_live": bool(live_items),
         }
         results.append(row)
 

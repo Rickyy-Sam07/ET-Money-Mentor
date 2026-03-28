@@ -1,3 +1,6 @@
+# [DEV1] voice_service.py — language detection + agent state prompts. Dev2: do not modify.
+from app.services.groq_service import detect_language_llm
+
 AGENT_STATE_PROMPTS = [
     "Please share your age.",
     "What is your monthly in-hand income?",
@@ -8,19 +11,7 @@ AGENT_STATE_PROMPTS = [
 
 
 def detect_language(text: str, fallback: str = "en") -> str:
-    normalized = text.strip().lower()
-    if not normalized:
-        return fallback
-    # Lightweight heuristic for hackathon prototype to avoid external language deps.
-    if any(token in normalized for token in ["namaste", "aap", "paisa", "rupaye"]):
-        return "hi"
-    if any(token in normalized for token in ["vanakkam", "ungal", "panam"]):
-        return "ta"
-    if any(token in normalized for token in ["namaskaram", "mee", "dabbu"]):
-        return "te"
-    if any(token in normalized for token in ["nomoskar", "apnar", "taka"]):
-        return "bn"
-    return "en"
+    return detect_language_llm(text, fallback=fallback)
 
 
 def respond(mode: str, text: str, turn: int) -> str:
