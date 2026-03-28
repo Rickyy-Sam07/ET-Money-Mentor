@@ -57,32 +57,68 @@ export function DashboardPage() {
           <strong>{investmentsCount}</strong>
         </article>
         <article className="metric-card">
+          <span>Money Health Score</span>
+          <strong>{safeProfile.health_score?.overall ?? "—"}/100</strong>
+        </article>
+        <article className="metric-card">
           <span>Next Best Step</span>
-          <strong>{completionPercent < 100 ? "Complete profile via voice" : "Run Tax and Portfolio"}</strong>
+          <strong>{completionPercent < 100 ? "Complete profile via onboarding" : "Run Tax and Portfolio"}</strong>
         </article>
       </div>
 
-      <section className="insight-panel">
-        <h3>Your Financial Profile</h3>
-        <div className="dashboard-profile-grid">
-          {fields.map((item) => (
-            <div key={item.label} className="metric-card">
-              <span>{item.label}</span>
-              <strong>{item.value ?? "Not set"}</strong>
+      <div className="dashboard-row-layout">
+        <section className="insight-panel flex-1">
+          <h3>Your Financial Profile</h3>
+          <div className="dashboard-profile-grid">
+            {fields.map((item) => (
+              <div key={item.label} className="metric-card">
+                <span>{item.label}</span>
+                <strong>{item.value ?? "Not set"}</strong>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {safeProfile.health_score && (
+          <section className="insight-panel flex-1">
+            <h3>Money Health Dimensions</h3>
+            <div className="radar-grid">
+              {Object.entries(safeProfile.health_score as Record<string, number>)
+                .filter(([k]) => k !== "overall")
+                .map(([k, v]) => (
+                  <div key={k} className="radar-item">
+                    <div className="radar-label">{k.replace(/_/g, " ")}</div>
+                    <div className="bar-track">
+                      <div
+                        className="bar-fill"
+                        style={{
+                          width: `${v}%`,
+                          background: v >= 70 ? "#1d7b5b" : v >= 40 ? "#d4a017" : "#d94040",
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
             </div>
-          ))}
-        </div>
-      </section>
+          </section>
+        )}
+      </div>
 
       <section className="insight-panel">
         <h3>Quick Actions</h3>
         <div className="dashboard-actions">
-          <Link className="action-link" to="/voice">Complete Profile with Voice</Link>
-          <Link className="action-link" to="/upload">Upload Form 16 / Statement</Link>
-          <Link className="action-link" to="/tax">Run Tax Wizard</Link>
-          <Link className="action-link" to="/portfolio">Run Portfolio X-Ray</Link>
-          <Link className="action-link" to="/news">Check Market Warnings</Link>
-          <Link className="action-link" to="/report">Generate Report</Link>
+          <Link className="action-link" to="/onboarding">🚀 Start Onboarding</Link>
+          <Link className="action-link" to="/voice">🎙️ Voice Mentor</Link>
+          <Link className="action-link" to="/upload">📄 Upload Documents</Link>
+          <Link className="action-link" to="/tax">⚖️ Tax Wizard</Link>
+          <Link className="action-link" to="/portfolio">📊 Portfolio X-Ray</Link>
+          <Link className="action-link" to="/news">🔔 News & Warnings</Link>
+          <Link className="action-link" to="/life-event">🌟 Life Events</Link>
+          <Link className="action-link" to="/couple">👫 Couple Planner</Link>
+          <Link className="action-link" to="/whatif">🧪 What-If Sim</Link>
+          <Link className="action-link" to="/emergency">🆘 Emergency Help</Link>
+          <Link className="action-link" to="/recommendations">🎯 Smart Recommendations</Link>
+          <Link className="action-link" to="/report">📈 Final Report</Link>
         </div>
       </section>
     </section>

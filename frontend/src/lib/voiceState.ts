@@ -17,11 +17,11 @@ const KEYS = {
   unifiedReport: "et_unified_report",
 };
 
-function saveJson(key: string, value: unknown) {
+export function saveJson(key: string, value: unknown) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-function loadJson<T>(key: string): T | null {
+export function loadJson<T>(key: string): T | null {
   const raw = localStorage.getItem(key);
   if (!raw) {
     return null;

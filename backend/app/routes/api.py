@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.db.models import Portfolio, Profile, TaxData, User
+from app.db.models import FinancialGoal, Portfolio, Profile, TaxData, User
 from app.schemas import (
     PortfolioAnalyzeRequest,
     SessionStartResponse,
@@ -96,6 +96,8 @@ def session_start(db: Session = Depends(get_db)) -> SessionStartResponse:
 def get_user(session_id: str, db: Session = Depends(get_db)) -> UserProfileResponse:
     user = _get_user_by_session(db, session_id)
     profile = db.query(Profile).filter(Profile.user_id == user.id).first()
+    goal = db.query(FinancialGoal).filter(FinancialGoal.user_id == user.id, FinancialGoal.goal_type == "fire_roadmap").first()
+    health_score = json.loads(goal.health_score) if goal and goal.health_score else None
 
     return UserProfileResponse(
         session_id=user.session_id,
@@ -108,6 +110,7 @@ def get_user(session_id: str, db: Session = Depends(get_db)) -> UserProfileRespo
             "investments": json.loads(profile.investments) if profile and profile.investments else [],
             "goals": json.loads(profile.goals) if profile and profile.goals else [],
             "risk_profile": profile.risk_profile if profile else None,
+            "health_score": health_score,
         },
     )
 

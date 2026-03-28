@@ -30,6 +30,31 @@ export function ReportPage() {
       <h2>Unified Report</h2>
       <p className="muted">Generated at: {report.generated_at ? new Date(report.generated_at).toLocaleString() : "—"}</p>
 
+      {/* Health Score Summary (Dev2) */}
+      {report.health_score && (
+        <div className="insight-panel">
+          <h3>Money Health Score: {report.health_score.overall}/100</h3>
+          <div className="radar-grid">
+            {Object.entries(report.health_score as Record<string, number>)
+              .filter(([k]) => k !== "overall")
+              .map(([k, v]) => (
+                <div key={k} className="radar-item">
+                  <div className="radar-label">{k.replace(/_/g, " ")}</div>
+                  <div className="bar-track">
+                    <div
+                      className="bar-fill"
+                      style={{
+                        width: `${v}%`,
+                        background: v >= 70 ? "#1d7b5b" : v >= 40 ? "#d4a017" : "#d94040",
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
       {/* Tax Summary */}
       <div className="insight-panel">
         <h3>Tax Summary</h3>
@@ -59,11 +84,11 @@ export function ReportPage() {
                 <ul className="plan-list" style={{ marginTop: 6 }}>
                   {Array.isArray(tax.deductions)
                     ? tax.deductions.map((d: any, i: number) => (
-                        <li key={i}>{d.section} — ₹{Number(d.amount ?? 0).toLocaleString("en-IN")}: {d.note}</li>
-                      ))
+                      <li key={i}>{d.section} — ₹{Number(d.amount ?? 0).toLocaleString("en-IN")}: {d.note}</li>
+                    ))
                     : Object.entries(tax.deductions).map(([k, v]) => (
-                        <li key={k}>{k.replace(/_/g, " ").toUpperCase()}: ₹{Number(v).toLocaleString("en-IN")}</li>
-                      ))}
+                      <li key={k}>{k.replace(/_/g, " ").toUpperCase()}: ₹{Number(v).toLocaleString("en-IN")}</li>
+                    ))}
                 </ul>
               </div>
             )}
@@ -72,6 +97,23 @@ export function ReportPage() {
           <p className="muted">No tax analysis data. Run Tax Wizard first.</p>
         )}
       </div>
+
+      {/* FIRE Roadmap (Dev2) */}
+      {report.roadmap && Array.isArray(report.roadmap) && (
+        <div className="insight-panel">
+          <h3>12-Month FIRE Roadmap</h3>
+          <div className="roadmap-timeline">
+            {report.roadmap.slice(0, 3).map((item: any) => (
+              <div key={item.month} className="roadmap-month">
+                <strong>Month {item.month} </strong>
+                <span className="muted"> (SIP: ₹{Number(item.sip_amount || 0).toLocaleString("en-IN")})</span>
+                <p className="muted" style={{ margin: "4px 0 0" }}>{item.actions?.[0] || "Continue investing."}</p>
+              </div>
+            ))}
+            {report.roadmap.length > 3 && <p className="muted">Plus {report.roadmap.length - 3} more months of actions...</p>}
+          </div>
+        </div>
+      )}
 
       {/* Portfolio Summary */}
       <div className="insight-panel">

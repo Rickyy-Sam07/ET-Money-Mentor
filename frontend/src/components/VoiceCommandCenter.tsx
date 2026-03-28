@@ -17,6 +17,7 @@ import {
   loadTaxInput,
   loadTaxResult,
   loadUploadPayload,
+  loadJson,
   saveNewsItems,
   savePortfolioInput,
   savePortfolioResult,
@@ -314,7 +315,7 @@ export function VoiceCommandCenter() {
     if (!mentorAudioUrl || !voiceOutputEnabled) return;
     const el = mentorAudioRef.current;
     if (!el) return;
-    el.play().catch(() => {});
+    el.play().catch(() => { });
     setMentorPlaying(true);
     el.onended = () => setMentorPlaying(false);
   }, [mentorAudioUrl]);
@@ -446,14 +447,14 @@ export function VoiceCommandCenter() {
           command.target === "/upload"
             ? "Opening upload section."
             : command.target === "/tax"
-            ? "Opening tax wizard."
-            : command.target === "/portfolio"
-            ? "Opening portfolio page."
-            : command.target === "/news"
-            ? "Opening news page."
-            : command.target === "/report"
-            ? "Opening report page."
-            : "Opening requested section.";
+              ? "Opening tax wizard."
+              : command.target === "/portfolio"
+                ? "Opening portfolio page."
+                : command.target === "/news"
+                  ? "Opening news page."
+                  : command.target === "/report"
+                    ? "Opening report page."
+                    : "Opening requested section.";
 
         if (voiceOutputEnabled && voiceData.tts_audio_base64) {
           const ttsBlob = b64ToBlob(voiceData.tts_audio_base64, voiceData.tts_content_type || "audio/mpeg");
@@ -549,6 +550,8 @@ export function VoiceCommandCenter() {
         const portfolioResult = loadPortfolioResult();
         const newsItems = loadNewsItems();
 
+        const profile = loadJson<any>("et_profile"); // Assuming we save profile to localStorage
+
         const report = {
           generated_at: new Date().toISOString(),
           source: "voice-command-center-agent-mode",
@@ -557,6 +560,9 @@ export function VoiceCommandCenter() {
           portfolio_input: portfolioInput,
           portfolio_result: portfolioResult,
           news: newsItems,
+          // Dev2 data
+          health_score: profile?.health_score || null,
+          roadmap: profile?.roadmap || null,
         };
 
         // Save to localStorage BEFORE navigating so ReportPage reads it on mount

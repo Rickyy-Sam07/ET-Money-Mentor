@@ -11,7 +11,7 @@
   --danger: #b3261e;
   --border: #e6e0cf;
   --shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
-  font-family: "Trebuchet MS", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Outfit", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: var(--text);
   background: radial-gradient(circle at 20% 0%, #2a2a2a 0%, var(--bg) 45%, #090909 100%);
 }
@@ -239,6 +239,17 @@ nav {
 .audio-player {
   margin-top: 12px;
   width: 100%;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.dashboard-row-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 14px;
 }
 
 .insight-panel {

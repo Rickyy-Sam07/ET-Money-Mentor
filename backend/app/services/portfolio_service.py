@@ -1,4 +1,5 @@
 # [DEV1] portfolio_service.py — XIRR, overlap, rebalancing engine. Dev2: do not modify.
+from datetime import datetime
 from typing import Any
 
 
