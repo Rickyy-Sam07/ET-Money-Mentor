@@ -1,7 +1,5 @@
-from typing import Any
-
-
-def _with_cess(tax: float) -> float:
+# [DEV1] tax_service.py — tax analysis engine. Dev2: do not modify.
+from typing import Any(tax: float) -> float:
     return tax * 1.04
 
 

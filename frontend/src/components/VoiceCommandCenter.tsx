@@ -1,9 +1,11 @@
-import { useRef, useState } from "react";
+// [DEV1] VoiceCommandCenter.tsx — hands-free voice command bar. Dev2: do not modify.
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   analyzePortfolio,
   analyzeTax,
   getNews,
+  processVoice,
   processVoiceAudio,
   resolveVoiceCommandIntent,
   type VoiceCommandOption,
@@ -120,6 +122,13 @@ function parseRegime(transcript: string): "old" | "new" | null {
   return null;
 }
 
+function isNonLatinScript(text: string): boolean {
+  // Returns true if the majority of word characters are non-ASCII (Bengali, Hindi, Tamil, etc.)
+  const nonAscii = (text.match(/[^\x00-\x7F]/g) || []).length;
+  const total = (text.match(/\S/g) || []).length;
+  return total > 0 && nonAscii / total > 0.3;
+}
+
 function parseCommand(transcript: string):
   | { kind: "navigate"; target: string }
   | { kind: "tax"; payload: { gross_salary: number; deductions_80c: number; deductions_80d: number; regime_preference: "old" | "new" } }
@@ -130,10 +139,15 @@ function parseCommand(transcript: string):
   | { kind: "unknown" } {
   const t = transcript.toLowerCase();
 
+  // If transcript is in a non-Latin script (Bengali, Hindi Devanagari, Tamil, etc.)
+  // skip all regex matching — let the LLM resolver handle it, fallback to conversation.
+  if (isNonLatinScript(transcript)) {
+    return { kind: "unknown" };
+  }
+
   const helpPatterns = [
-    /\b(help|commands|what can you do)\b/,
-    /\bmadad\b/,
-    /\bkaise\s+use\s+karu\b/,
+    /^help$|^commands$|^what can you do$/,
+    /^madad$/,
   ];
 
   const openPatterns = [
@@ -291,6 +305,32 @@ export function VoiceCommandCenter() {
   const [error, setError] = useState("");
   const [ttsInfo, setTtsInfo] = useState("");
   const [mentorAudioUrl, setMentorAudioUrl] = useState("");
+  const [voiceOutputEnabled, setVoiceOutputEnabled] = useState(false);
+  const mentorAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [mentorPlaying, setMentorPlaying] = useState(false);
+
+  // Auto-play mentor audio whenever a new audio URL is set
+  useEffect(() => {
+    if (!mentorAudioUrl || !voiceOutputEnabled) return;
+    const el = mentorAudioRef.current;
+    if (!el) return;
+    el.play().catch(() => {});
+    setMentorPlaying(true);
+    el.onended = () => setMentorPlaying(false);
+  }, [mentorAudioUrl]);
+
+  function toggleMentorPlay() {
+    const el = mentorAudioRef.current;
+    if (!el) return;
+    if (!el.paused) {
+      el.pause();
+      setMentorPlaying(false);
+    } else {
+      el.play();
+      setMentorPlaying(true);
+      el.onended = () => setMentorPlaying(false);
+    }
+  }
 
   function b64ToBlob(base64: string, contentType: string): Blob {
     const byteCharacters = atob(base64);
@@ -368,7 +408,7 @@ export function VoiceCommandCenter() {
         audioFile,
         language: undefined,
         mode: "agent",
-        useTts: true,
+        useTts: voiceOutputEnabled,
       });
 
       const transcript = String(voiceData.transcript || "").trim();
@@ -383,8 +423,12 @@ export function VoiceCommandCenter() {
             commands: COMMAND_CATALOG,
           });
           llmReason = resolved.reason || "";
-          if (resolved.command_id && resolved.command_id !== "unknown") {
-            command = commandFromId(resolved.command_id, transcript);
+          const resolvedId = resolved.command_id;
+          // For non-Latin scripts, block only "help" (which false-positives on transliterations).
+          // All other LLM-resolved commands (report, tax, portfolio, navigate, news) are allowed.
+          const blockAsConversational = isNonLatinScript(transcript) && resolvedId === "help";
+          if (resolvedId && resolvedId !== "unknown" && !blockAsConversational) {
+            command = commandFromId(resolvedId, transcript);
           }
         } catch {
           // Keep regex fallback parsing path.
@@ -411,14 +455,12 @@ export function VoiceCommandCenter() {
             ? "Opening report page."
             : "Opening requested section.";
 
-        if (voiceData.tts_audio_base64) {
-          const ttsBlob = b64ToBlob(voiceData.tts_audio_base64, voiceData.tts_content_type || "audio/wav");
+        if (voiceOutputEnabled && voiceData.tts_audio_base64) {
+          const ttsBlob = b64ToBlob(voiceData.tts_audio_base64, voiceData.tts_content_type || "audio/mpeg");
           const url = URL.createObjectURL(ttsBlob);
           setMentorAudioUrl(url);
-        } else {
-          if (voiceData.tts_skipped_reason) {
-            setTtsInfo(voiceData.tts_skipped_reason);
-          }
+        } else if (voiceOutputEnabled) {
+          if (voiceData.tts_skipped_reason) setTtsInfo(voiceData.tts_skipped_reason);
           speakShortReply(shortReply);
         }
 
@@ -443,14 +485,12 @@ export function VoiceCommandCenter() {
         saveTaxResult(taxResult);
         navigate("/tax");
         const shortReply = "Tax analysis completed. Opening tax page.";
-        if (voiceData.tts_audio_base64) {
-          const ttsBlob = b64ToBlob(voiceData.tts_audio_base64, voiceData.tts_content_type || "audio/wav");
+        if (voiceOutputEnabled && voiceData.tts_audio_base64) {
+          const ttsBlob = b64ToBlob(voiceData.tts_audio_base64, voiceData.tts_content_type || "audio/mpeg");
           const url = URL.createObjectURL(ttsBlob);
           setMentorAudioUrl(url);
-        } else {
-          if (voiceData.tts_skipped_reason) {
-            setTtsInfo(voiceData.tts_skipped_reason);
-          }
+        } else if (voiceOutputEnabled) {
+          if (voiceData.tts_skipped_reason) setTtsInfo(voiceData.tts_skipped_reason);
           speakShortReply(shortReply);
         }
         setLast({
@@ -468,14 +508,12 @@ export function VoiceCommandCenter() {
         savePortfolioResult(portfolioResult);
         navigate("/portfolio");
         const shortReply = "Portfolio analysis completed. Opening portfolio page.";
-        if (voiceData.tts_audio_base64) {
-          const ttsBlob = b64ToBlob(voiceData.tts_audio_base64, voiceData.tts_content_type || "audio/wav");
+        if (voiceOutputEnabled && voiceData.tts_audio_base64) {
+          const ttsBlob = b64ToBlob(voiceData.tts_audio_base64, voiceData.tts_content_type || "audio/mpeg");
           const url = URL.createObjectURL(ttsBlob);
           setMentorAudioUrl(url);
-        } else {
-          if (voiceData.tts_skipped_reason) {
-            setTtsInfo(voiceData.tts_skipped_reason);
-          }
+        } else if (voiceOutputEnabled) {
+          if (voiceData.tts_skipped_reason) setTtsInfo(voiceData.tts_skipped_reason);
           speakShortReply(shortReply);
         }
         setLast({
@@ -492,14 +530,12 @@ export function VoiceCommandCenter() {
         saveNewsItems(items);
         navigate("/news");
         const shortReply = "News refreshed. Opening news page.";
-        if (voiceData.tts_audio_base64) {
-          const ttsBlob = b64ToBlob(voiceData.tts_audio_base64, voiceData.tts_content_type || "audio/wav");
+        if (voiceOutputEnabled && voiceData.tts_audio_base64) {
+          const ttsBlob = b64ToBlob(voiceData.tts_audio_base64, voiceData.tts_content_type || "audio/mpeg");
           const url = URL.createObjectURL(ttsBlob);
           setMentorAudioUrl(url);
-        } else {
-          if (voiceData.tts_skipped_reason) {
-            setTtsInfo(voiceData.tts_skipped_reason);
-          }
+        } else if (voiceOutputEnabled) {
+          if (voiceData.tts_skipped_reason) setTtsInfo(voiceData.tts_skipped_reason);
           speakShortReply(shortReply);
         }
         setLast({ userText: transcript, mentorReply: shortReply, actionSummary: `News refreshed with ${items.length} items.` });
@@ -523,26 +559,26 @@ export function VoiceCommandCenter() {
           news: newsItems,
         };
 
+        // Save to localStorage BEFORE navigating so ReportPage reads it on mount
         saveUnifiedReport(report);
-        navigate("/report");
+
         const shortReply = "Report generated. Opening report page.";
-        if (voiceData.tts_audio_base64) {
-          const ttsBlob = b64ToBlob(voiceData.tts_audio_base64, voiceData.tts_content_type || "audio/wav");
+        if (voiceOutputEnabled && voiceData.tts_audio_base64) {
+          const ttsBlob = b64ToBlob(voiceData.tts_audio_base64, voiceData.tts_content_type || "audio/mpeg");
           const url = URL.createObjectURL(ttsBlob);
           setMentorAudioUrl(url);
-        } else {
-          if (voiceData.tts_skipped_reason) {
-            setTtsInfo(voiceData.tts_skipped_reason);
-          }
+        } else if (voiceOutputEnabled) {
+          if (voiceData.tts_skipped_reason) setTtsInfo(voiceData.tts_skipped_reason);
           speakShortReply(shortReply);
         }
         setLast({ userText: transcript, mentorReply: shortReply, actionSummary: "Unified report generated and opened." });
+        navigate("/report");
         return;
       }
 
       if (command.kind === "help") {
         const shortReply = "You can say: open upload, run tax, run portfolio, refresh news, generate report.";
-        speakShortReply(shortReply);
+        if (voiceOutputEnabled) speakShortReply(shortReply);
         setLast({
           userText: transcript,
           mentorReply: shortReply,
@@ -552,12 +588,39 @@ export function VoiceCommandCenter() {
         return;
       }
 
-      speakShortReply("I did not understand. Say help for command examples.");
-      setLast({
-        userText: transcript,
-        mentorReply: "I did not understand. Say help for command examples.",
-        actionSummary: "Command not recognized. Say help to hear valid voice commands.",
-      });
+      // For normal conversation, fall back to mentor chat instead of hard-failing.
+      try {
+        const chatData = await processVoice({
+          text: transcript,
+          language: voiceData.detected_language,
+          mode: "ask",
+          useTts: true,
+        });
+        const conversationalReply = String(chatData.response || mentor || "I am here. How can I help with your finances?");
+
+        if (voiceOutputEnabled && chatData.tts_audio_base64) {
+          const ttsBlob = b64ToBlob(chatData.tts_audio_base64, chatData.tts_content_type || "audio/mpeg");
+          const url = URL.createObjectURL(ttsBlob);
+          setMentorAudioUrl(url);
+        } else if (voiceOutputEnabled) {
+          if (chatData.tts_skipped_reason) setTtsInfo(chatData.tts_skipped_reason);
+          speakShortReply(conversationalReply);
+        }
+
+        setLast({
+          userText: transcript,
+          mentorReply: conversationalReply,
+          actionSummary: "No command action. Responded in conversation mode.",
+        });
+      } catch {
+        const fallbackReply = mentor || "I am here. Say help for commands or ask any finance question.";
+        if (voiceOutputEnabled) speakShortReply(fallbackReply);
+        setLast({
+          userText: transcript,
+          mentorReply: fallbackReply,
+          actionSummary: "No command action. Used fallback conversational response.",
+        });
+      }
     } catch {
       setError("Voice command processing failed. Check backend and API keys.");
     } finally {
@@ -568,18 +631,59 @@ export function VoiceCommandCenter() {
 
   return (
     <section className="voice-command-center">
-      <h3>Hands-Free Voice Commands (Agent Mode)</h3>
-      <p className="muted">Use speech only: navigate pages, run tax, run portfolio, refresh news, and generate report.</p>
-      <button type="button" onClick={recording ? stopAndRun : startRecording} disabled={busy}>
-        {recording ? "Stop and Execute Command" : busy ? "Processing..." : "Start Voice Command"}
+      <div className="vcc-header">
+        <div>
+          <h3>Hands-Free Voice Commands (Agent Mode)</h3>
+          <p className="muted">Navigate pages, run tax, run portfolio, refresh news, and generate report.</p>
+        </div>
+        <label className="voice-toggle-label">
+          <span>Voice Output</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={voiceOutputEnabled}
+            onClick={() => { setVoiceOutputEnabled((v) => !v); setTtsInfo(""); setMentorAudioUrl(""); }}
+            className={`toggle-switch ${voiceOutputEnabled ? "toggle-on" : ""}`}
+          >
+            <span className="toggle-thumb" />
+          </button>
+          <span className={voiceOutputEnabled ? "toggle-status-on" : "toggle-status-off"}>
+            {voiceOutputEnabled ? "On" : "Off"}
+          </span>
+        </label>
+      </div>
+      <button type="button" onClick={recording ? stopAndRun : startRecording} disabled={busy} className={recording ? "recording" : ""}>
+        {recording ? "⏹ Stop and Execute" : busy ? "⏳ Processing..." : "🎙 Start Voice Command"}
       </button>
       {error ? <p className="error-text">{error}</p> : null}
       {ttsInfo ? <p className="muted">{ttsInfo}</p> : null}
-      {mentorAudioUrl ? <audio controls autoPlay src={mentorAudioUrl} className="audio-player" /> : null}
+      {mentorAudioUrl && (
+        <audio
+          ref={mentorAudioRef}
+          src={mentorAudioUrl}
+          preload="auto"
+          onEnded={() => setMentorPlaying(false)}
+        />
+      )}
       {last ? (
         <div className="voice-command-log">
           <p><strong>Heard:</strong> {last.userText || "(empty)"}</p>
-          <p><strong>Mentor:</strong> {last.mentorReply || "(no reply)"}</p>
+          <p>
+            <span className="bubble-label">
+              <strong>Mentor</strong>
+              {mentorAudioUrl && (
+                <button
+                  type="button"
+                  className="mentor-play-btn"
+                  onClick={toggleMentorPlay}
+                  aria-label={mentorPlaying ? "Pause" : "Play"}
+                >
+                  {mentorPlaying ? "⏸" : "▶"}
+                </button>
+              )}
+            </span>
+            {" "}{last.mentorReply || "(no reply)"}
+          </p>
           <p><strong>Action:</strong> {last.actionSummary}</p>
         </div>
       ) : null}

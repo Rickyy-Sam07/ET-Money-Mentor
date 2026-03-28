@@ -1,3 +1,4 @@
+// [DEV1] DashboardPage.tsx — shared dashboard. Dev2: add your widgets inside the card below the insight panels.
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ensureSession, getProfile } from "../lib/api";

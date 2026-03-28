@@ -1,3 +1,4 @@
+// [DEV1] NewsPage.tsx — news & warnings. Dev2: do not modify.
 import { useEffect, useState } from "react";
 import { getNews } from "../lib/api";
 import { loadNewsItems, saveNewsItems } from "../lib/voiceState";

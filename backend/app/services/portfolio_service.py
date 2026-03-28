@@ -1,5 +1,5 @@
+# [DEV1] portfolio_service.py — XIRR, overlap, rebalancing engine. Dev2: do not modify.
 from typing import Any
-from datetime import datetime
 
 
 def _safe_float(value: Any, default: float = 0.0) -> float:

@@ -1,6 +1,5 @@
+# [DEV1] news_service.py — RAG news query + warning tagging. Dev2: do not modify.
 from typing import Any
-
-from app.services.newsdata_service import fetch_latest_finance_news
 
 
 NEWS_STORE = [

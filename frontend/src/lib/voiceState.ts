@@ -1,3 +1,4 @@
+// [DEV1] voiceState.ts — shared localStorage state. Dev2: add your own KEYS and save/load functions below.
 export type TaxInput = {
   gross_salary: number;
   deductions_80c: number;

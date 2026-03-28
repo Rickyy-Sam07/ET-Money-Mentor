@@ -1,3 +1,4 @@
+# [DEV1] groq_service.py — LLM calls (mentor, language detect, OCR parse, command intent). Dev2: do not modify.
 import os
 import time
 import json
@@ -96,7 +97,90 @@ def generate_mentor_response(
         return _fallback_response(mode, turn)
 
 
-def _fallback_command_intent(transcript: str, commands: list[dict[str, Any]]) -> dict[str, Any]:
+def detect_language_llm(text: str, fallback: str = "en") -> str:
+    """Use LLM to detect language of user input. Returns ISO 639-1 code."""
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key or not text.strip():
+        return fallback
+
+    payload = {
+        "model": os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
+        "temperature": 0,
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    "You are a language detector. Given a text, reply with ONLY the ISO 639-1 "
+                    "two-letter language code (e.g. en, hi, ta, te, bn, mr, gu, kn, ml, pa). "
+                    "No explanation, no punctuation, just the code."
+                ),
+            },
+            {"role": "user", "content": text[:500]},
+        ],
+    }
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    try:
+        data = _post_with_retry(headers=headers, payload=payload)
+        code = data["choices"][0]["message"]["content"].strip().lower()[:5]
+        # Keep only alpha chars and take first 2
+        code = "".join(c for c in code if c.isalpha())[:2]
+        return code if len(code) == 2 else fallback
+    except Exception:
+        return fallback
+
+
+def parse_ocr_to_structured_json(ocr_text: str, document_type: str) -> dict:
+    """Pass raw OCR text to LLM and get structured JSON. Never hallucinate — missing = null."""
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key or not ocr_text.strip():
+        return {}
+
+    if document_type == "form16":
+        schema_hint = (
+            "{\"employer\": string|null, \"pan\": string|null, \"gross_salary\": number|null, "
+            "\"basic_salary\": number|null, \"hra\": number|null, \"special_allowance\": number|null, "
+            "\"deductions_80c\": number|null, \"deductions_80d\": number|null, "
+            "\"deductions_80e\": number|null, \"deductions_hra_exemption\": number|null, "
+            "\"tds_deducted\": number|null, \"assessment_year\": string|null}"
+        )
+    else:
+        schema_hint = (
+            "{\"funds\": [{\"name\": string|null, \"units\": number|null, \"nav\": number|null, "
+            "\"invested_amount\": number|null, \"buy_date\": string|null, "
+            "\"expense_ratio\": number|null}]}"
+        )
+
+    system_prompt = (
+        "You are a financial document parser. Extract data from OCR text into the exact JSON schema provided. "
+        "CRITICAL RULES: "
+        "1. Only use values explicitly present in the OCR text. "
+        "2. If a field is not found, set it to null. "
+        "3. Do NOT invent, guess, or hallucinate any value. "
+        "4. Return ONLY valid JSON, no explanation."
+    )
+    user_prompt = (
+        f"Document type: {document_type}\n"
+        f"Required JSON schema: {schema_hint}\n"
+        f"OCR text:\n{ocr_text[:4000]}\n"
+        "Return only the JSON object."
+    )
+
+    payload = {
+        "model": os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
+        "temperature": 0,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+    }
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    try:
+        data = _post_with_retry(headers=headers, payload=payload)
+        content = data["choices"][0]["message"]["content"].strip()
+        parsed = _extract_json_block(content)
+        return parsed if isinstance(parsed, dict) else {}
+    except Exception:
+        return {}
     t = transcript.lower()
     known_ids = {str(row.get("id", "")).strip() for row in commands}
 

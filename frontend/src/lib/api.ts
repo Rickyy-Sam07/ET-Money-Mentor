@@ -1,3 +1,4 @@
+// [DEV1] api.ts — shared API client. Dev2: append your functions below, do not modify existing ones.
 import axios from "axios";
 
 const api = axios.create({

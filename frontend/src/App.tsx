@@ -1,3 +1,4 @@
+// [DEV1] App.tsx — routing shell. Dev2: add your routes here, do not remove existing ones.
 import { Navigate, Route, Routes } from "react-router-dom";
 import { NavBar } from "./components/NavBar";
 import { VoiceCommandCenter } from "./components/VoiceCommandCenter";

@@ -1,8 +1,9 @@
+// [DEV1] NavBar.tsx — shared nav. Dev2: add your nav links to the links array below.
 import { NavLink } from "react-router-dom";
 
 const links = [
   { to: "/", label: "Dashboard" },
-  { to: "/voice", label: "Voice" },
+  { to: "/voice", label: "Help" },
   { to: "/upload", label: "Upload" },
   { to: "/tax", label: "Tax Wizard" },
   { to: "/portfolio", label: "Portfolio X-Ray" },

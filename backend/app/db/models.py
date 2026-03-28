@@ -1,3 +1,4 @@
+# [DEV1] models.py — DB models. Dev2: append your tables at the bottom.
 from datetime import datetime
 
 from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text

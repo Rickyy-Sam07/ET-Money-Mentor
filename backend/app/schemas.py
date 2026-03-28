@@ -1,3 +1,4 @@
+# [DEV1] schemas.py — Pydantic models. Dev2: append your schemas at the bottom.
 from datetime import datetime
 from typing import Any
 
