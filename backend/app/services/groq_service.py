@@ -217,8 +217,24 @@ def _fallback_command_intent(transcript: str, commands: list[dict[str, Any]]) ->
     if any(token in t for token in ["help", "madad", "commands"]):
         return {"command_id": "help", "confidence": 0.45, "reason": "fallback keyword match"}
 
+    if any(token in t for token in ["dashboard", "home"]) and exists("navigate_dashboard"):
+        return {"command_id": "navigate_dashboard", "confidence": 0.55, "reason": "fallback keyword match"}
+    if "onboarding" in t and exists("navigate_onboarding"):
+        return {"command_id": "navigate_onboarding", "confidence": 0.55, "reason": "fallback keyword match"}
+    if "voice" in t and exists("navigate_voice"):
+        return {"command_id": "navigate_voice", "confidence": 0.55, "reason": "fallback keyword match"}
     if any(token in t for token in ["upload", "file", "document"]) and exists("navigate_upload"):
         return {"command_id": "navigate_upload", "confidence": 0.55, "reason": "fallback keyword match"}
+    if any(token in t for token in ["life event", "wedding", "education"]) and exists("navigate_life_event"):
+        return {"command_id": "navigate_life_event", "confidence": 0.55, "reason": "fallback keyword match"}
+    if any(token in t for token in ["couple", "partner", "joint"]) and exists("navigate_couple"):
+        return {"command_id": "navigate_couple", "confidence": 0.55, "reason": "fallback keyword match"}
+    if any(token in t for token in ["what if", "scenario", "simulation"]) and exists("navigate_whatif"):
+        return {"command_id": "navigate_whatif", "confidence": 0.55, "reason": "fallback keyword match"}
+    if any(token in t for token in ["emergency", "urgent", "crisis"]) and exists("navigate_emergency"):
+        return {"command_id": "navigate_emergency", "confidence": 0.55, "reason": "fallback keyword match"}
+    if any(token in t for token in ["recommendation", "recommendations", "suggestion", "advise"]) and exists("navigate_recommendations"):
+        return {"command_id": "navigate_recommendations", "confidence": 0.55, "reason": "fallback keyword match"}
     if any(token in t for token in ["tax", "80c", "80d", "salary"]) and exists("run_tax"):
         return {"command_id": "run_tax", "confidence": 0.55, "reason": "fallback keyword match"}
     if "portfolio" in t and exists("run_portfolio"):

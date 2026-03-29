@@ -118,50 +118,41 @@ def _map_language_code(code: str | None) -> str:
 
 
 def _map_speaker(lang_code: str) -> str:
-    # hi-IN → shubh, bn-IN → aayan, everything else → arya (en-IN)
+    # Use shubh for English, Hindi, and Bengali voice output.
     mapping = {
+        "en-IN": "shubh",
         "hi-IN": "shubh",
-        "bn-IN": "aayan",
+        "bn-IN": "shubh",
     }
-    return mapping.get(lang_code, "arya")
+    return mapping.get(lang_code, "shubh")
 
 
 def synthesize_text(text: str, detected_language: str | None = None) -> tuple[str, str]:
-    key = os.getenv("SARVAM_API_SUBSCRIPTION_KEY") or os.getenv("SARVAM_API_KEY")
-    if not key:
-        raise ValueError("Missing SARVAM_API_SUBSCRIPTION_KEY or SARVAM_API_KEY environment variable.")
+    from sarvamai import SarvamAI
 
+    key = _get_sarvam_key()
     target_lang = _map_language_code(detected_language)
     speaker = _map_speaker(target_lang)
 
-    headers = {
-        "api-subscription-key": key,
-        "Content-Type": "application/json",
-    }
-    payload = {
-        "text": text,
-        "target_language_code": target_lang,
-        "speaker": speaker,
-        "model": "bulbul:v3",
-        "pace": 1.1,
-        "speech_sample_rate": 22050,
-        "output_audio_codec": "mp3",
-        "enable_preprocessing": True,
-    }
-    timeout_sec = int(os.getenv("SARVAM_TTS_TIMEOUT_SEC", "30"))
+    client = SarvamAI(api_subscription_key=key)
 
-    def _call() -> bytes:
-        resp = requests.post(
-            "https://api.sarvam.ai/text-to-speech/stream",
-            headers=headers,
-            json=payload,
-            timeout=timeout_sec,
-            stream=True,
+    def _call() -> str:
+        response = client.text_to_speech.convert(
+            text=text,
+            target_language_code=target_lang,
+            speaker=speaker,
+            model="bulbul:v3",
+            pace=1.1,
+            speech_sample_rate=22050,
+            output_audio_codec="wav",
+            enable_preprocessing=True,
         )
-        if resp.status_code in {429, 500, 502, 503, 504}:
-            resp.raise_for_status()
-        resp.raise_for_status()
-        return b"".join(resp.iter_content(chunk_size=4096))
+        audios = list(getattr(response, "audios", []) or [])
+        if not audios:
+            raise RuntimeError("Sarvam TTS returned no audio payload.")
+        return str(audios[0]).strip()
 
-    audio_bytes = _retry_call(_call)
-    return base64.b64encode(audio_bytes).decode("utf-8"), "audio/mpeg"
+    audio_base64 = _retry_call(_call)
+    if not audio_base64:
+        raise RuntimeError("Sarvam TTS returned an empty audio payload.")
+    return audio_base64, "audio/wav"

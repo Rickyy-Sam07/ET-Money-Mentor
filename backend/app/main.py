@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+from pathlib import Path
 import uvicorn
 
 from app.db.database import Base, engine
@@ -13,7 +14,8 @@ try:
 except Exception:
     pass
 
-load_dotenv()
+# Load backend/.env explicitly so keys are picked consistently regardless of launch cwd.
+load_dotenv(dotenv_path=Path(__file__).resolve().parents[1] / ".env")
 
 Base.metadata.create_all(bind=engine)
 

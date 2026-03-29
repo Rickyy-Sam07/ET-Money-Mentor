@@ -1,5 +1,6 @@
 # [DEV1] api.py — all API routes. Dev2: add your routes at the BOTTOM of this file only.
 import json
+import logging
 import os
 import tempfile
 import uuid
@@ -33,6 +34,7 @@ from app.services.upload_service import parse_uploaded_file
 from app.services.voice_service import detect_language
 
 router = APIRouter(prefix="/api", tags=["api"])
+logger = logging.getLogger(__name__)
 
 voice_turns: dict[str, int] = {}
 PROHIBITED_PHRASES = ("guaranteed return", "guaranteed returns")
@@ -162,8 +164,9 @@ def process_voice(payload: VoiceRequest, db: Session = Depends(get_db)) -> Voice
     if payload.use_tts and _tts_enabled() and reply.strip():
         try:
             tts_audio_base64, tts_content_type = synthesize_text(reply, detected_language)
-        except Exception as exc:
-            raise HTTPException(status_code=400, detail=f"TTS generation failed: {exc}") from exc
+        except Exception:
+            logger.exception("Sarvam TTS failed in /voice/process")
+            tts_skipped_reason = "Voice output is temporarily unavailable. Showing text response instead."
     elif payload.use_tts and not _tts_enabled():
         tts_skipped_reason = "TTS is disabled by backend configuration (ENABLE_TTS=false)."
     elif payload.use_tts and not reply.strip():
@@ -231,8 +234,9 @@ async def process_voice_audio(
     if use_tts and _tts_enabled() and reply.strip():
         try:
             tts_audio_base64, tts_content_type = synthesize_text(reply, detected_language)
-        except Exception as exc:
-            raise HTTPException(status_code=400, detail=f"Text-to-speech failed: {exc}") from exc
+        except Exception:
+            logger.exception("Sarvam TTS failed in /voice/process-audio")
+            tts_skipped_reason = "Voice output is temporarily unavailable. Showing text response instead."
     elif use_tts and not _tts_enabled():
         tts_skipped_reason = "TTS is disabled by backend configuration (ENABLE_TTS=false)."
     elif use_tts and not reply.strip():
