@@ -1,12 +1,21 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+from pathlib import Path
 import uvicorn
 
 from app.db.database import Base, engine
 from app.routes.api import router as api_router
+from app.routes.dev2_routes import router as dev2_router
 
-load_dotenv()
+try:
+    with engine.connect() as conn:
+        pass
+except Exception:
+    pass
+
+# Load backend/.env explicitly so keys are picked consistently regardless of launch cwd.
+load_dotenv(dotenv_path=Path(__file__).resolve().parents[1] / ".env")
 
 Base.metadata.create_all(bind=engine)
 
@@ -21,6 +30,7 @@ app.add_middleware(
 )
 
 app.include_router(api_router)
+app.include_router(dev2_router)
 
 
 if __name__ == "__main__":

@@ -17,6 +17,7 @@ import {
   loadTaxInput,
   loadTaxResult,
   loadUploadPayload,
+  loadJson,
   saveNewsItems,
   savePortfolioInput,
   savePortfolioResult,
@@ -41,6 +42,11 @@ const COMMAND_CATALOG: VoiceCommandOption[] = [
     id: "navigate_dashboard",
     description: "Open dashboard or home page",
     examples: ["open dashboard", "go to home", "home kholo"],
+  },
+  {
+    id: "navigate_onboarding",
+    description: "Open onboarding page",
+    examples: ["open onboarding", "go to onboarding", "onboarding kholo"],
   },
   {
     id: "navigate_voice",
@@ -71,6 +77,31 @@ const COMMAND_CATALOG: VoiceCommandOption[] = [
     id: "navigate_report",
     description: "Open report page",
     examples: ["open report", "report kholo"],
+  },
+  {
+    id: "navigate_life_event",
+    description: "Open life-event planner page",
+    examples: ["open life event", "go to life event", "life event kholo"],
+  },
+  {
+    id: "navigate_couple",
+    description: "Open couple planner page",
+    examples: ["open couple planner", "go to couple section", "couple kholo"],
+  },
+  {
+    id: "navigate_whatif",
+    description: "Open what-if simulator page",
+    examples: ["open what if", "take me to what if section", "what if kholo"],
+  },
+  {
+    id: "navigate_emergency",
+    description: "Open emergency response page",
+    examples: ["open emergency", "go to emergency", "emergency kholo"],
+  },
+  {
+    id: "navigate_recommendations",
+    description: "Open recommendations page",
+    examples: ["open recommendations", "show recommendations", "recommendations kholo"],
   },
   {
     id: "run_tax",
@@ -156,12 +187,18 @@ function parseCommand(transcript: string):
   ];
 
   const dashboardPatterns = [/(dashboard|home)\b/, /\b(home|ghar)\b/];
+  const onboardingPatterns = [/\bonboarding\b/, /\bstart\s+onboarding\b/];
   const voicePatterns = [/\bvoice\b/, /\bawaaz\b/];
   const uploadPatterns = [/\bupload\b/, /\b(document|file)\b/, /\b(file\s+upload|document\s+upload)\b/];
   const taxPatterns = [/\btax\b/, /\btax\s+analysis\b/, /\btax\s+calculate\b/, /\btax\s+nikalo\b/, /\btax\s+chalao\b/];
   const portfolioPatterns = [/\bportfolio\b/, /\bx-?ray\b/, /\bportfolio\s+check\b/, /\bportfolio\s+dekh\b/];
   const newsPatterns = [/\bnews\b/, /\bmarket\b/, /\bheadlines\b/, /\bkhabar\b/, /\bnews\s+dikhao\b/];
   const reportPatterns = [/\breport\b/, /\bfinal\s+report\b/, /\breport\s+banao\b/, /\breport\s+dikhao\b/];
+  const lifeEventPatterns = [/\blife\s*-?\s*event\b/, /\bmajor\s+expense\b/, /\bwedding\b/, /\beducation\b/];
+  const couplePatterns = [/\bcouple\b/, /\bpartner\b/, /\bjoint\s+plan\b/];
+  const whatIfPatterns = [/\bwhat\s*-?\s*if\b/, /\bscenario\b/, /\bsimulation\b/];
+  const emergencyPatterns = [/\bemergency\b/, /\burgent\b/, /\bcrisis\b/];
+  const recommendationsPatterns = [/\brecommendations\b/, /\badvise\b/, /\bsuggestions\b/];
 
   const runTaxPatterns = [
     /\b(run|analyze|calculate).*(tax)\b/,
@@ -198,12 +235,18 @@ function parseCommand(transcript: string):
 
   if (containsAny(t, openPatterns)) {
     if (containsAny(t, dashboardPatterns)) return { kind: "navigate", target: "/" };
+    if (containsAny(t, onboardingPatterns)) return { kind: "navigate", target: "/onboarding" };
     if (containsAny(t, voicePatterns)) return { kind: "navigate", target: "/voice" };
     if (containsAny(t, uploadPatterns)) return { kind: "navigate", target: "/upload" };
     if (containsAny(t, taxPatterns)) return { kind: "navigate", target: "/tax" };
     if (containsAny(t, portfolioPatterns)) return { kind: "navigate", target: "/portfolio" };
     if (containsAny(t, newsPatterns)) return { kind: "navigate", target: "/news" };
     if (containsAny(t, reportPatterns)) return { kind: "navigate", target: "/report" };
+    if (containsAny(t, lifeEventPatterns)) return { kind: "navigate", target: "/life-event" };
+    if (containsAny(t, couplePatterns)) return { kind: "navigate", target: "/couple" };
+    if (containsAny(t, whatIfPatterns)) return { kind: "navigate", target: "/whatif" };
+    if (containsAny(t, emergencyPatterns)) return { kind: "navigate", target: "/emergency" };
+    if (containsAny(t, recommendationsPatterns)) return { kind: "navigate", target: "/recommendations" };
   }
 
   if (containsAny(t, runTaxPatterns)) {
@@ -262,12 +305,18 @@ function commandFromId(commandId: string, transcript: string):
   | { kind: "help" }
   | { kind: "unknown" } {
   if (commandId === "navigate_dashboard") return { kind: "navigate", target: "/" };
+  if (commandId === "navigate_onboarding") return { kind: "navigate", target: "/onboarding" };
   if (commandId === "navigate_voice") return { kind: "navigate", target: "/voice" };
   if (commandId === "navigate_upload") return { kind: "navigate", target: "/upload" };
   if (commandId === "navigate_tax") return { kind: "navigate", target: "/tax" };
   if (commandId === "navigate_portfolio") return { kind: "navigate", target: "/portfolio" };
   if (commandId === "navigate_news") return { kind: "navigate", target: "/news" };
   if (commandId === "navigate_report") return { kind: "navigate", target: "/report" };
+  if (commandId === "navigate_life_event") return { kind: "navigate", target: "/life-event" };
+  if (commandId === "navigate_couple") return { kind: "navigate", target: "/couple" };
+  if (commandId === "navigate_whatif") return { kind: "navigate", target: "/whatif" };
+  if (commandId === "navigate_emergency") return { kind: "navigate", target: "/emergency" };
+  if (commandId === "navigate_recommendations") return { kind: "navigate", target: "/recommendations" };
 
   if (commandId === "run_tax") {
     const existing = loadTaxInput();
@@ -314,7 +363,7 @@ export function VoiceCommandCenter() {
     if (!mentorAudioUrl || !voiceOutputEnabled) return;
     const el = mentorAudioRef.current;
     if (!el) return;
-    el.play().catch(() => {});
+    el.play().catch(() => { });
     setMentorPlaying(true);
     el.onended = () => setMentorPlaying(false);
   }, [mentorAudioUrl]);
@@ -403,7 +452,8 @@ export function VoiceCommandCenter() {
       setTtsInfo("");
       setMentorAudioUrl("");
       const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
-      const audioFile = new File([audioBlob], "voice-command.webm", { type: "audio/webm" });
+      // Sarvam SDK can reject uploads based on file extension; using .wav improves compatibility.
+      const audioFile = new File([audioBlob], "voice-command.wav", { type: "audio/wav" });
       const voiceData = await processVoiceAudio({
         audioFile,
         language: undefined,
@@ -413,7 +463,7 @@ export function VoiceCommandCenter() {
 
       const transcript = String(voiceData.transcript || "").trim();
       const mentor = String(voiceData.response || "").trim();
-      let command = parseCommand(transcript);
+      let command: ReturnType<typeof parseCommand> = { kind: "unknown" };
       let llmReason = "";
 
       if (transcript) {
@@ -433,6 +483,11 @@ export function VoiceCommandCenter() {
         } catch {
           // Keep regex fallback parsing path.
         }
+
+        // LLM-first routing: only use local regex parser if LLM couldn't map an intent.
+        if (command.kind === "unknown") {
+          command = parseCommand(transcript);
+        }
       }
 
       if (!transcript) {
@@ -445,15 +500,27 @@ export function VoiceCommandCenter() {
         const shortReply =
           command.target === "/upload"
             ? "Opening upload section."
+            : command.target === "/onboarding"
+              ? "Opening onboarding page."
             : command.target === "/tax"
-            ? "Opening tax wizard."
-            : command.target === "/portfolio"
-            ? "Opening portfolio page."
-            : command.target === "/news"
-            ? "Opening news page."
-            : command.target === "/report"
-            ? "Opening report page."
-            : "Opening requested section.";
+              ? "Opening tax wizard."
+              : command.target === "/portfolio"
+                ? "Opening portfolio page."
+                : command.target === "/news"
+                  ? "Opening news page."
+                  : command.target === "/report"
+                    ? "Opening report page."
+                    : command.target === "/life-event"
+                      ? "Opening life-event planner."
+                    : command.target === "/couple"
+                      ? "Opening couple planner."
+                    : command.target === "/whatif"
+                      ? "Opening What-If simulator."
+                    : command.target === "/emergency"
+                      ? "Opening emergency page."
+                    : command.target === "/recommendations"
+                      ? "Opening recommendations page."
+                    : "Opening requested section.";
 
         if (voiceOutputEnabled && voiceData.tts_audio_base64) {
           const ttsBlob = b64ToBlob(voiceData.tts_audio_base64, voiceData.tts_content_type || "audio/mpeg");
@@ -549,6 +616,8 @@ export function VoiceCommandCenter() {
         const portfolioResult = loadPortfolioResult();
         const newsItems = loadNewsItems();
 
+        const profile = loadJson<any>("et_profile"); // Assuming we save profile to localStorage
+
         const report = {
           generated_at: new Date().toISOString(),
           source: "voice-command-center-agent-mode",
@@ -557,6 +626,9 @@ export function VoiceCommandCenter() {
           portfolio_input: portfolioInput,
           portfolio_result: portfolioResult,
           news: newsItems,
+          // Dev2 data
+          health_score: profile?.health_score || null,
+          roadmap: profile?.roadmap || null,
         };
 
         // Save to localStorage BEFORE navigating so ReportPage reads it on mount
@@ -577,13 +649,13 @@ export function VoiceCommandCenter() {
       }
 
       if (command.kind === "help") {
-        const shortReply = "You can say: open upload, run tax, run portfolio, refresh news, generate report.";
+        const shortReply = "You can say: open onboarding, what if, life event, emergency, recommendations, tax, portfolio, news, or report.";
         if (voiceOutputEnabled) speakShortReply(shortReply);
         setLast({
           userText: transcript,
           mentorReply: shortReply,
           actionSummary:
-            "Try: open tax, run tax analysis salary 1400000 80c 150000 80d 25000 old regime, run portfolio xray, refresh news, generate report. Hinglish also works: tax chalao, portfolio dekh, khabar dikhao, report banao.",
+            "Try: open what if, open tax, run tax analysis salary 1400000 80c 150000 80d 25000 old regime, run portfolio xray, refresh news, generate report. Hinglish also works: tax chalao, portfolio dekh, khabar dikhao, report banao.",
         });
         return;
       }
@@ -594,7 +666,7 @@ export function VoiceCommandCenter() {
           text: transcript,
           language: voiceData.detected_language,
           mode: "ask",
-          useTts: true,
+          useTts: voiceOutputEnabled,
         });
         const conversationalReply = String(chatData.response || mentor || "I am here. How can I help with your finances?");
 
@@ -621,8 +693,9 @@ export function VoiceCommandCenter() {
           actionSummary: "No command action. Used fallback conversational response.",
         });
       }
-    } catch {
-      setError("Voice command processing failed. Check backend and API keys.");
+    } catch (err: any) {
+      const detail = String(err?.response?.data?.detail || "").trim();
+      setError(detail ? `Voice command failed: ${detail}` : "Voice command processing failed. Check backend and API keys.");
     } finally {
       setBusy(false);
       chunksRef.current = [];

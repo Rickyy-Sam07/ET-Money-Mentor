@@ -137,17 +137,17 @@ def parse_ocr_to_structured_json(ocr_text: str, document_type: str) -> dict:
 
     if document_type == "form16":
         schema_hint = (
-            "{\"employer\": string|null, \"pan\": string|null, \"gross_salary\": number|null, "
-            "\"basic_salary\": number|null, \"hra\": number|null, \"special_allowance\": number|null, "
-            "\"deductions_80c\": number|null, \"deductions_80d\": number|null, "
-            "\"deductions_80e\": number|null, \"deductions_hra_exemption\": number|null, "
-            "\"tds_deducted\": number|null, \"assessment_year\": string|null}"
+            '{"employer": string|null, "pan": string|null, "gross_salary": number|null, '
+            '"basic_salary": number|null, "hra": number|null, "special_allowance": number|null, '
+            '"deductions_80c": number|null, "deductions_80d": number|null, '
+            '"deductions_80e": number|null, "deductions_hra_exemption": number|null, '
+            '"tds_deducted": number|null, "assessment_year": string|null}'
         )
     else:
         schema_hint = (
-            "{\"funds\": [{\"name\": string|null, \"units\": number|null, \"nav\": number|null, "
-            "\"invested_amount\": number|null, \"buy_date\": string|null, "
-            "\"expense_ratio\": number|null}]}"
+            '{"funds": [{"name": string|null, "units": number|null, "nav": number|null, '
+            '"invested_amount": number|null, "buy_date": string|null, '
+            '"expense_ratio": number|null}]}'
         )
 
     system_prompt = (
@@ -181,27 +181,6 @@ def parse_ocr_to_structured_json(ocr_text: str, document_type: str) -> dict:
         return parsed if isinstance(parsed, dict) else {}
     except Exception:
         return {}
-    t = transcript.lower()
-    known_ids = {str(row.get("id", "")).strip() for row in commands}
-
-    def exists(command_id: str) -> bool:
-        return command_id in known_ids
-
-    if any(token in t for token in ["help", "madad", "commands"]):
-        return {"command_id": "help", "confidence": 0.45, "reason": "fallback keyword match"}
-
-    if any(token in t for token in ["upload", "file", "document"]) and exists("navigate_upload"):
-        return {"command_id": "navigate_upload", "confidence": 0.55, "reason": "fallback keyword match"}
-    if any(token in t for token in ["tax", "80c", "80d", "salary"]) and exists("run_tax"):
-        return {"command_id": "run_tax", "confidence": 0.55, "reason": "fallback keyword match"}
-    if "portfolio" in t and exists("run_portfolio"):
-        return {"command_id": "run_portfolio", "confidence": 0.55, "reason": "fallback keyword match"}
-    if any(token in t for token in ["news", "market", "khabar"]) and exists("run_news"):
-        return {"command_id": "run_news", "confidence": 0.55, "reason": "fallback keyword match"}
-    if "report" in t and exists("generate_report"):
-        return {"command_id": "generate_report", "confidence": 0.55, "reason": "fallback keyword match"}
-
-    return {"command_id": "unknown", "confidence": 0.0, "reason": "no fallback keyword match"}
 
 
 def _extract_json_block(raw: str) -> dict[str, Any] | None:
@@ -226,6 +205,46 @@ def _extract_json_block(raw: str) -> dict[str, Any] | None:
         except Exception:
             return None
     return None
+
+
+def _fallback_command_intent(transcript: str, commands: list[dict[str, Any]]) -> dict[str, Any]:
+    t = transcript.lower()
+    known_ids = {str(row.get("id", "")).strip() for row in commands}
+
+    def exists(command_id: str) -> bool:
+        return command_id in known_ids
+
+    if any(token in t for token in ["help", "madad", "commands"]):
+        return {"command_id": "help", "confidence": 0.45, "reason": "fallback keyword match"}
+
+    if any(token in t for token in ["dashboard", "home"]) and exists("navigate_dashboard"):
+        return {"command_id": "navigate_dashboard", "confidence": 0.55, "reason": "fallback keyword match"}
+    if "onboarding" in t and exists("navigate_onboarding"):
+        return {"command_id": "navigate_onboarding", "confidence": 0.55, "reason": "fallback keyword match"}
+    if "voice" in t and exists("navigate_voice"):
+        return {"command_id": "navigate_voice", "confidence": 0.55, "reason": "fallback keyword match"}
+    if any(token in t for token in ["upload", "file", "document"]) and exists("navigate_upload"):
+        return {"command_id": "navigate_upload", "confidence": 0.55, "reason": "fallback keyword match"}
+    if any(token in t for token in ["life event", "wedding", "education"]) and exists("navigate_life_event"):
+        return {"command_id": "navigate_life_event", "confidence": 0.55, "reason": "fallback keyword match"}
+    if any(token in t for token in ["couple", "partner", "joint"]) and exists("navigate_couple"):
+        return {"command_id": "navigate_couple", "confidence": 0.55, "reason": "fallback keyword match"}
+    if any(token in t for token in ["what if", "scenario", "simulation"]) and exists("navigate_whatif"):
+        return {"command_id": "navigate_whatif", "confidence": 0.55, "reason": "fallback keyword match"}
+    if any(token in t for token in ["emergency", "urgent", "crisis"]) and exists("navigate_emergency"):
+        return {"command_id": "navigate_emergency", "confidence": 0.55, "reason": "fallback keyword match"}
+    if any(token in t for token in ["recommendation", "recommendations", "suggestion", "advise"]) and exists("navigate_recommendations"):
+        return {"command_id": "navigate_recommendations", "confidence": 0.55, "reason": "fallback keyword match"}
+    if any(token in t for token in ["tax", "80c", "80d", "salary"]) and exists("run_tax"):
+        return {"command_id": "run_tax", "confidence": 0.55, "reason": "fallback keyword match"}
+    if "portfolio" in t and exists("run_portfolio"):
+        return {"command_id": "run_portfolio", "confidence": 0.55, "reason": "fallback keyword match"}
+    if any(token in t for token in ["news", "market", "khabar"]) and exists("run_news"):
+        return {"command_id": "run_news", "confidence": 0.55, "reason": "fallback keyword match"}
+    if "report" in t and exists("generate_report"):
+        return {"command_id": "generate_report", "confidence": 0.55, "reason": "fallback keyword match"}
+
+    return {"command_id": "unknown", "confidence": 0.0, "reason": "no fallback keyword match"}
 
 
 def resolve_voice_command_intent(transcript: str, commands: list[dict[str, Any]]) -> dict[str, Any]:

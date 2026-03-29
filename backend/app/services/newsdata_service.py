@@ -1,5 +1,11 @@
 # [DEV1] newsdata_service.py — NewsData.io live feed + sentiment. Dev2: do not modify.
-import os = "https://newsdata.io/api/1/latest"
+import os
+import time
+from typing import Any
+
+import requests
+
+NEWSDATA_URL = "https://newsdata.io/api/1/latest"
 _CACHE: dict[str, Any] = {"expires_at": 0.0, "items": []}
 
 

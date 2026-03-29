@@ -1,5 +1,6 @@
 # [DEV1] api.py — all API routes. Dev2: add your routes at the BOTTOM of this file only.
 import json
+import logging
 import os
 import tempfile
 import uuid
@@ -11,7 +12,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.db.models import Portfolio, Profile, TaxData, User
+from app.db.models import FinancialGoal, Portfolio, Profile, TaxData, User
 from app.schemas import (
     PortfolioAnalyzeRequest,
     SessionStartResponse,
@@ -33,6 +34,7 @@ from app.services.upload_service import parse_uploaded_file
 from app.services.voice_service import detect_language
 
 router = APIRouter(prefix="/api", tags=["api"])
+logger = logging.getLogger(__name__)
 
 voice_turns: dict[str, int] = {}
 PROHIBITED_PHRASES = ("guaranteed return", "guaranteed returns")
@@ -96,6 +98,8 @@ def session_start(db: Session = Depends(get_db)) -> SessionStartResponse:
 def get_user(session_id: str, db: Session = Depends(get_db)) -> UserProfileResponse:
     user = _get_user_by_session(db, session_id)
     profile = db.query(Profile).filter(Profile.user_id == user.id).first()
+    goal = db.query(FinancialGoal).filter(FinancialGoal.user_id == user.id, FinancialGoal.goal_type == "fire_roadmap").first()
+    health_score = json.loads(goal.health_score) if goal and goal.health_score else None
 
     return UserProfileResponse(
         session_id=user.session_id,
@@ -108,6 +112,7 @@ def get_user(session_id: str, db: Session = Depends(get_db)) -> UserProfileRespo
             "investments": json.loads(profile.investments) if profile and profile.investments else [],
             "goals": json.loads(profile.goals) if profile and profile.goals else [],
             "risk_profile": profile.risk_profile if profile else None,
+            "health_score": health_score,
         },
     )
 
@@ -159,8 +164,9 @@ def process_voice(payload: VoiceRequest, db: Session = Depends(get_db)) -> Voice
     if payload.use_tts and _tts_enabled() and reply.strip():
         try:
             tts_audio_base64, tts_content_type = synthesize_text(reply, detected_language)
-        except Exception as exc:
-            raise HTTPException(status_code=400, detail=f"TTS generation failed: {exc}") from exc
+        except Exception:
+            logger.exception("Sarvam TTS failed in /voice/process")
+            tts_skipped_reason = "Voice output is temporarily unavailable. Showing text response instead."
     elif payload.use_tts and not _tts_enabled():
         tts_skipped_reason = "TTS is disabled by backend configuration (ENABLE_TTS=false)."
     elif payload.use_tts and not reply.strip():
@@ -228,8 +234,9 @@ async def process_voice_audio(
     if use_tts and _tts_enabled() and reply.strip():
         try:
             tts_audio_base64, tts_content_type = synthesize_text(reply, detected_language)
-        except Exception as exc:
-            raise HTTPException(status_code=400, detail=f"Text-to-speech failed: {exc}") from exc
+        except Exception:
+            logger.exception("Sarvam TTS failed in /voice/process-audio")
+            tts_skipped_reason = "Voice output is temporarily unavailable. Showing text response instead."
     elif use_tts and not _tts_enabled():
         tts_skipped_reason = "TTS is disabled by backend configuration (ENABLE_TTS=false)."
     elif use_tts and not reply.strip():
