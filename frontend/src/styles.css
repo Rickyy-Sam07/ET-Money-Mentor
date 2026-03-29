@@ -941,9 +941,7 @@ body {
 /* ── Dev1 Styles ─────────────────────────────────────────── */
 
 .voice-command-center {
-  position: sticky;
-  top: 10px;
-  z-index: 20;
+  position: relative;
   margin-bottom: 14px;
   background: linear-gradient(90deg, #111111 0%, #171717 70%, #241d0d 100%);
   color: #ffffff;

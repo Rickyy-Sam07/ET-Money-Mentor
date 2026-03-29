@@ -8,6 +8,7 @@ psycopg2-binary==2.9.11
 groq>=0.12.0
 python-dotenv>=1.0.0
 requests==2.32.3
+pypdf>=4.3.1
 sarvamai
 paddleocr
 pillow==10.4.0
