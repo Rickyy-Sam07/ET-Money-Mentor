@@ -46,6 +46,51 @@
 
 ---
 
+## 🔍 Feature Deep-Dive
+
+### 1️⃣ Unified Dashboard
+The command center of the ET Money Mentor. It pulls data from all modules (Tax, Portfolio, Personal Profile) to calculate a **Dynamic Financial Health Score**. 
+- **Tech:** FastAPI background aggregation + React state normalization.
+
+### 2️⃣ Deep-Profile Onboarding
+A multi-step onboarding process that captures your financial DNA, including current assets, liabilities, risk appetite, and long-term goals.
+- **Goal:** Personalized context for all AI-driven advice.
+
+### 3️⃣ Voice Hub (STT/TTS)
+End-to-end voice integration using **Sarvam AI**. Users can ask, "How much did I save last month?" and get an instant spoken response.
+- **Workflow:** Voice → Sarvam STT → Groq LLM → Action → Sarvam TTS → Audio Reply.
+
+### 4️⃣ Smart Document Upload
+A specialized module for ingesting physical financial life. It supports PDFs and Images of legal bank statements or Form 16s.
+- **Engine:** Uses **PaddleOCR** for high-accuracy text extraction.
+
+### 5️⃣ Intelligent Tax Planner
+Calculates your tax liability based on uploaded data. It provides a **Regime Simulator**, showing exactly how much you save in the New vs. Old Indian Tax Regimes.
+- **Logic:** Automated deduction mapping for section 80C, 80D, etc.
+
+### 6️⃣ Portfolio X-Ray
+Deeper than a simple tracker. It identifies **Mutual Fund Overlap** (when multiple funds hold the same stocks) and calculates real-time **XIRR** against market benchmarks.
+
+### 7️⃣ Global News Radar
+A curated signal-over-noise feed. It uses the **NewsData.io API** to scan thousands of sources but only surfaces news that impacts *your* specific sector allocations.
+
+### 8️⃣ Life-Event Simulator
+Plan for the future by simulating major life changes (Marriage, Child, Home Purchase). The app calculates the **Opportunity Cost** and adjust your FIRE roadmap.
+
+### 9️⃣ Couple's Financial Planner
+A cooperative mode where two distinct profiles are merged. It helps partners plan for joint expenses and shared retirement goals.
+
+### 🔟 What-If Financial Engine
+Advanced "stress testing" for your portfolio. *What if market crashes by 20%?* *What if I increase SIP by 10%?* The engine models these wealth paths instantly.
+
+### 🕚 AI Emergency Bot
+A dedicated crisis-response chatbot trained to provide rational, data-backed advice during financial emergencies or market volatility.
+
+### 🕛 Intelligent Report
+Unified generator for high-level PDF/HTML output for any time period.
+
+---
+
 ## 🛠️ Tech Stack
 
 ### Frontend
